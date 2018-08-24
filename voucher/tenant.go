@@ -1,30 +1,21 @@
-package origin
+package voucher
 
 import (
 	"context"
-	"errors"
 	ot "github.com/petomalina/opentransaction"
 )
 
 type Tenant struct{}
 
 func (tenant *Tenant) Name() ot.TenantID {
-	return "Origin"
+	return "Voucher"
 }
 
 func (tenant *Tenant) Accept(ctx context.Context, t ot.Transaction) error {
-	if t.DestinationTenant() == tenant.Name() {
-		return errors.New("origin can't accept any transactions, please see the documentation")
-	}
-
 	return nil
 }
 
 func (tenant *Tenant) AcceptRequest(ctx context.Context, t ot.Transaction) error {
-	if t.DestinationTenant() == tenant.Name() {
-		return errors.New("origin can't accept any transactions, please see the documentation")
-	}
-
 	return nil
 }
 

@@ -2,7 +2,10 @@ package opentransaction
 
 import (
 	"context"
+	"errors"
 	"fmt"
+
+	"github.com/gofrs/uuid"
 )
 
 type TenantID string
@@ -23,6 +26,19 @@ type SimpleTransaction struct {
 	id, fromRef, toRef              string
 	originTenant, destinationTenant TenantID
 	value                           int
+}
+
+func NewSimpleTransaction(from, to string, originT, destinationT TenantID, value int) *SimpleTransaction {
+	id, _ := uuid.NewV4()
+
+	return &SimpleTransaction{
+		id:                id,
+		originTenant:      originT,
+		destinationTenant: destinationT,
+		fromRef:           from,
+		toRef:             to,
+		value:             value,
+	}
 }
 
 func (t *SimpleTransaction) ID() string {
@@ -99,9 +115,18 @@ func (c *Core) Send(tt ...Transaction) error {
 			if i == failIndex {
 				break
 			}
+
+			// revert both origin and destination for each transaction
+			c.tenants[t.OriginTenant()].Revert(context.Background(), t)
+			c.tenants[t.DestinationTenant()].Revert(context.Background(), t)
 		}
+
+		return errors.New("an error occured during the transaction (reverted): " + err.Error())
 	}
+
+	return nil
 }
 
 func (c *Core) SendRequest(t Transaction) error {
+	return nil
 }
