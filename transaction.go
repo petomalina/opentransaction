@@ -2,8 +2,8 @@ package opentransaction
 
 import (
 	"context"
-	"errors"
 	"fmt"
+	"github.com/pkg/errors"
 
 	"github.com/gofrs/uuid"
 )
@@ -76,11 +76,14 @@ type Tenant interface {
 
 type Core struct {
 	tenants map[TenantID]Tenant
+
+	rbac *RBAC
 }
 
-func NewCore() *Core {
+func NewCore(rbacOpts ...RBACOption) *Core {
 	return &Core{
 		tenants: make(map[TenantID]Tenant),
+		rbac:    NewRBAC(rbacOpts...),
 	}
 }
 
@@ -91,6 +94,14 @@ func (c *Core) RegisterTenant(t Tenant) error {
 }
 
 func (c *Core) Send(tt ...Transaction) error {
+	// enforce RBAC policies
+	for _, t := range tt {
+		if err := c.rbac.Enforce(t); err != nil {
+			return errors.Wrap(err, "an RBAC policy failed for the transaction"+fmt.Sprintf("%+v", t))
+		}
+	}
+
+	// send transactions
 	var failIndex = 0
 	var t Transaction
 	var err error
