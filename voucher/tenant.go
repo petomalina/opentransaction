@@ -7,7 +7,7 @@ import (
 
 type Tenant struct{}
 
-func (tenant *Tenant) Name() ot.TenantID {
+func (tenant *Tenant) Name() string {
 	return "Voucher"
 }
 

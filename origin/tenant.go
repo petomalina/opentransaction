@@ -8,12 +8,12 @@ import (
 
 type Tenant struct{}
 
-func (tenant *Tenant) Name() ot.TenantID {
+func (tenant *Tenant) Name() string {
 	return "Origin"
 }
 
 func (tenant *Tenant) Accept(ctx context.Context, t ot.Transaction) error {
-	if t.DestinationTenant() == tenant.Name() {
+	if t.GetDestinationTenant() == tenant.Name() {
 		return errors.New("origin can't accept any transactions, please see the documentation")
 	}
 
@@ -21,7 +21,7 @@ func (tenant *Tenant) Accept(ctx context.Context, t ot.Transaction) error {
 }
 
 func (tenant *Tenant) AcceptRequest(ctx context.Context, t ot.Transaction) error {
-	if t.DestinationTenant() == tenant.Name() {
+	if t.GetDestinationTenant() == tenant.Name() {
 		return errors.New("origin can't accept any transactions, please see the documentation")
 	}
 

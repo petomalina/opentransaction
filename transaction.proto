@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package opentransaction;
+
+service TransactionService {
+
+}
+
+message SimpleTransaction {
+    string ID = 1;
+
+    string origin_tenant = 2;
+    string destination_tenant = 3;
+
+    string from_ref = 4;
+    string to_ref = 5;
+
+    int64 value = 6;
+}

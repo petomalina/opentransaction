@@ -20,13 +20,13 @@ var (
 type RBAC struct {
 	defaultPolicy RBACDefaultPolicy
 
-	policyMap map[TenantID][]TenantID
+	policyMap map[string][]string
 }
 
 func NewRBAC(opts ...RBACOption) *RBAC {
 	rbac := &RBAC{
 		defaultPolicy: RBACDefaultOpen,
-		policyMap:     map[TenantID][]TenantID{},
+		policyMap:     map[string][]string{},
 	}
 
 	for _, opt := range opts {
@@ -44,10 +44,10 @@ func WithClosedPolicy() RBACOption {
 	}
 }
 
-func WithPolicy(origin, destination TenantID) RBACOption {
+func WithPolicy(origin, destination string) RBACOption {
 	return func(rbac *RBAC) {
 		if _, ok := rbac.policyMap[origin]; !ok {
-			rbac.policyMap[origin] = make([]TenantID, 1)
+			rbac.policyMap[origin] = make([]string, 1)
 		}
 
 		rbac.policyMap[origin] = append(rbac.policyMap[origin], destination)
@@ -55,23 +55,23 @@ func WithPolicy(origin, destination TenantID) RBACOption {
 }
 
 func (rbac *RBAC) Enforce(t Transaction) error {
-	fmt.Println(rbac.policyMap, t.OriginTenant())
+	fmt.Println(rbac.policyMap, t.GetOriginTenant())
 	// open policy will automatically authorize any requests
 	if rbac.defaultPolicy == RBACDefaultOpen {
 		return nil
 	}
 
-	policies, ok := rbac.policyMap[t.OriginTenant()]
+	policies, ok := rbac.policyMap[t.GetOriginTenant()]
 	if !ok {
-		return errors.Wrap(MissingOriginRBACPolicyErr, "enforce failed for origin RBAC policy on: "+string(t.OriginTenant()))
+		return errors.Wrap(MissingOriginRBACPolicyErr, "enforce failed for origin RBAC policy on: "+string(t.GetOriginTenant()))
 	}
 
 	for _, p := range policies {
 		// policy found
-		if p == t.DestinationTenant() {
+		if p == t.GetDestinationTenant() {
 			return nil
 		}
 	}
 
-	return errors.Wrap(MissingDestinationRBACPolicyErr, "enforce failed for destination RBAC policy on: "+string(t.DestinationTenant()))
+	return errors.Wrap(MissingDestinationRBACPolicyErr, "enforce failed for destination RBAC policy on: "+string(t.GetDestinationTenant()))
 }

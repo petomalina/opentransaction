@@ -8,36 +8,28 @@ import (
 	"github.com/gofrs/uuid"
 )
 
-type TenantID string
-
 type Transaction interface {
-	ID() string
+	GetID() string
 
-	OriginTenant() TenantID
-	DestinationTenant() TenantID
+	GetOriginTenant() string
+	GetDestinationTenant() string
 
-	FromRef() string
-	ToRef() string
+	GetFromRef() string
+	GetToRef() string
 
-	Value() int
+	GetValue() int64
 }
 
-type SimpleTransaction struct {
-	id, fromRef, toRef              string
-	originTenant, destinationTenant TenantID
-	value                           int
-}
-
-func NewSimpleTransaction(from, to string, originT, destinationT TenantID, value int) *SimpleTransaction {
+func NewSimpleTransaction(from, to, originT, destinationT string, value int64) *SimpleTransaction {
 	id, _ := uuid.NewV4()
 
 	return &SimpleTransaction{
-		id:                id.String(),
-		originTenant:      originT,
-		destinationTenant: destinationT,
-		fromRef:           from,
-		toRef:             to,
-		value:             value,
+		ID:                id.String(),
+		OriginTenant:      originT,
+		DestinationTenant: destinationT,
+		FromRef:           from,
+		ToRef:             to,
+		Value:             value,
 	}
 }
 
@@ -45,41 +37,17 @@ func NewRandomTransaction() *SimpleTransaction {
 	id, _ := uuid.NewV4()
 
 	return &SimpleTransaction{
-		id:                id.String(),
-		originTenant:      "Balance",
-		destinationTenant: "Bank",
-		fromRef:           "A",
-		toRef:             "B",
-		value:             100,
+		ID:                id.String(),
+		OriginTenant:      "Balance",
+		DestinationTenant: "Bank",
+		FromRef:           "A",
+		ToRef:             "B",
+		Value:             100,
 	}
 }
 
-func (t *SimpleTransaction) ID() string {
-	return t.id
-}
-
-func (t *SimpleTransaction) OriginTenant() TenantID {
-	return t.originTenant
-}
-
-func (t *SimpleTransaction) DestinationTenant() TenantID {
-	return t.destinationTenant
-}
-
-func (t *SimpleTransaction) FromRef() string {
-	return t.fromRef
-}
-
-func (t *SimpleTransaction) ToRef() string {
-	return t.toRef
-}
-
-func (t *SimpleTransaction) Value() int {
-	return t.value
-}
-
 type Tenant interface {
-	ID() TenantID
+	ID() string
 
 	Accept(ctx context.Context, t Transaction) error
 	AcceptRequest(ctx context.Context, t Transaction) error
@@ -88,14 +56,14 @@ type Tenant interface {
 }
 
 type Core struct {
-	tenants map[TenantID]Tenant
+	tenants map[string]Tenant
 
 	rbac *RBAC
 }
 
 func NewCore(rbacOpts ...RBACOption) *Core {
 	return &Core{
-		tenants: make(map[TenantID]Tenant),
+		tenants: make(map[string]Tenant),
 		rbac:    NewRBAC(rbacOpts...),
 	}
 }
@@ -122,12 +90,12 @@ func (c *Core) Send(tt ...Transaction) error {
 	for failIndex, t = range tt {
 		fmt.Printf("Sending transaction %+v\n", t)
 
-		if err = c.tenants[t.OriginTenant()].Accept(context.Background(), t); err != nil {
+		if err = c.tenants[t.GetOriginTenant()].Accept(context.Background(), t); err != nil {
 			break
 		}
 
-		if err = c.tenants[t.DestinationTenant()].Accept(context.Background(), t); err != nil {
-			c.tenants[t.OriginTenant()].Revert(context.Background(), t)
+		if err = c.tenants[t.GetDestinationTenant()].Accept(context.Background(), t); err != nil {
+			c.tenants[t.GetOriginTenant()].Revert(context.Background(), t)
 			break
 		}
 	}
@@ -141,8 +109,8 @@ func (c *Core) Send(tt ...Transaction) error {
 			}
 
 			// revert both origin and destination for each transaction
-			c.tenants[t.OriginTenant()].Revert(context.Background(), t)
-			c.tenants[t.DestinationTenant()].Revert(context.Background(), t)
+			c.tenants[t.GetOriginTenant()].Revert(context.Background(), t)
+			c.tenants[t.GetDestinationTenant()].Revert(context.Background(), t)
 		}
 
 		return errors.New("an error occured during the transaction (reverted): " + err.Error())

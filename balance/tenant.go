@@ -7,31 +7,31 @@ import (
 )
 
 type Tenant struct {
-	accounts map[string]int
+	accounts map[string]int64
 }
 
-func (tenant *Tenant) Name() ot.TenantID {
+func (tenant *Tenant) Name() string {
 	return "Balance"
 }
 
 func (tenant *Tenant) Accept(ctx context.Context, t ot.Transaction) error {
-	if t.OriginTenant() == t.DestinationTenant() {
+	if t.GetOriginTenant() == t.GetDestinationTenant() {
 		return nil
 	}
 
 	// money goes out from this tenant
-	if t.OriginTenant() == tenant.Name() {
-		if tenant.accounts[t.FromRef()] < t.Value() {
+	if t.GetOriginTenant() == tenant.Name() {
+		if tenant.accounts[t.GetFromRef()] < t.GetValue() {
 			return errors.New("not enough balance on the origin")
 		}
 
-		tenant.accounts[t.FromRef()] -= t.Value()
+		tenant.accounts[t.GetFromRef()] -= t.GetValue()
 
 		return nil
 	}
 
 	// received balance
-	tenant.accounts[t.ToRef()] += t.Value()
+	tenant.accounts[t.GetToRef()] += t.GetValue()
 
 	return nil
 }
