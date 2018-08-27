@@ -1,6 +1,9 @@
 package opentransaction
 
-import "github.com/pkg/errors"
+import (
+	"fmt"
+	"github.com/pkg/errors"
+)
 
 type RBACDefaultPolicy string
 
@@ -23,6 +26,7 @@ type RBAC struct {
 func NewRBAC(opts ...RBACOption) *RBAC {
 	rbac := &RBAC{
 		defaultPolicy: RBACDefaultOpen,
+		policyMap:     map[TenantID][]TenantID{},
 	}
 
 	for _, opt := range opts {
@@ -51,6 +55,7 @@ func WithPolicy(origin, destination TenantID) RBACOption {
 }
 
 func (rbac *RBAC) Enforce(t Transaction) error {
+	fmt.Println(rbac.policyMap, t.OriginTenant())
 	// open policy will automatically authorize any requests
 	if rbac.defaultPolicy == RBACDefaultOpen {
 		return nil

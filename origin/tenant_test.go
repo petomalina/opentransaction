@@ -2,6 +2,7 @@ package origin
 
 import (
 	"context"
+	"github.com/petomalina/opentransaction"
 	"github.com/stretchr/testify/suite"
 	"testing"
 )
@@ -16,7 +17,7 @@ func (s *TenantSuite) SetupTest() {
 }
 
 func (s *TenantSuite) TestAccept() {
-	s.tenant.Accept(context.Background(), nil)
+	s.tenant.Accept(context.Background(), opentransaction.NewRandomTransaction())
 }
 
 func (s *TenantSuite) TestAcceptRequest() {

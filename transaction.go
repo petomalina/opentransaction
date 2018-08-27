@@ -32,12 +32,25 @@ func NewSimpleTransaction(from, to string, originT, destinationT TenantID, value
 	id, _ := uuid.NewV4()
 
 	return &SimpleTransaction{
-		id:                id,
+		id:                id.String(),
 		originTenant:      originT,
 		destinationTenant: destinationT,
 		fromRef:           from,
 		toRef:             to,
 		value:             value,
+	}
+}
+
+func NewRandomTransaction() *SimpleTransaction {
+	id, _ := uuid.NewV4()
+
+	return &SimpleTransaction{
+		id:                id.String(),
+		originTenant:      "Balance",
+		destinationTenant: "Bank",
+		fromRef:           "A",
+		toRef:             "B",
+		value:             100,
 	}
 }
 
