@@ -14,22 +14,22 @@ type RBACSuite struct {
 func (s *RBACSuite) TestEnforce() {
 	candidates := []struct {
 		options      []RBACOption
-		transactions map[Transaction]error
+		transactions map[Transferable]error
 	}{
 		{
 			options: []RBACOption{},
-			transactions: map[Transaction]error{
-				NewSimpleTransaction("A", "B", "Balance", "Balance", 100): nil,
-				NewSimpleTransaction("B", "A", "Balance", "Balance", 100): nil,
+			transactions: map[Transferable]error{
+				NewTransaction("A", "B", "Balance", "Balance", 100): nil,
+				NewTransaction("B", "A", "Balance", "Balance", 100): nil,
 			},
 		},
 		{
 			options: []RBACOption{
 				WithClosedPolicy(),
 			},
-			transactions: map[Transaction]error{
-				NewSimpleTransaction("A", "B", "Balance", "Balance", 100): MissingOriginRBACPolicyErr,
-				NewSimpleTransaction("B", "A", "Balance", "Balance", 100): MissingOriginRBACPolicyErr,
+			transactions: map[Transferable]error{
+				NewTransaction("A", "B", "Balance", "Balance", 100): MissingOriginRBACPolicyErr,
+				NewTransaction("B", "A", "Balance", "Balance", 100): MissingOriginRBACPolicyErr,
 			},
 		},
 		{
@@ -37,11 +37,11 @@ func (s *RBACSuite) TestEnforce() {
 				WithClosedPolicy(),
 				WithPolicy("Balance", "Balance"),
 			},
-			transactions: map[Transaction]error{
-				NewSimpleTransaction("A", "B", "Balance", "Balance", 100): nil,
-				NewSimpleTransaction("B", "A", "Balance", "Balance", 100): nil,
-				NewSimpleTransaction("B", "A", "Balance", "Bank", 100):    MissingDestinationRBACPolicyErr,
-				NewSimpleTransaction("B", "A", "Bank", "Balance", 100):    MissingOriginRBACPolicyErr,
+			transactions: map[Transferable]error{
+				NewTransaction("A", "B", "Balance", "Balance", 100): nil,
+				NewTransaction("B", "A", "Balance", "Balance", 100): nil,
+				NewTransaction("B", "A", "Balance", "Bank", 100):    MissingDestinationRBACPolicyErr,
+				NewTransaction("B", "A", "Bank", "Balance", 100):    MissingOriginRBACPolicyErr,
 			},
 		},
 	}

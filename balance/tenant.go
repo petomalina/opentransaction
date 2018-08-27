@@ -14,7 +14,7 @@ func (tenant *Tenant) Name() string {
 	return "Balance"
 }
 
-func (tenant *Tenant) Accept(ctx context.Context, t ot.Transaction) error {
+func (tenant *Tenant) Accept(ctx context.Context, t ot.Transferable) error {
 	if t.GetOriginTenant() == t.GetDestinationTenant() {
 		return nil
 	}
@@ -36,10 +36,10 @@ func (tenant *Tenant) Accept(ctx context.Context, t ot.Transaction) error {
 	return nil
 }
 
-func (tenant *Tenant) AcceptRequest(ctx context.Context, t ot.Transaction) error {
+func (tenant *Tenant) AcceptRequest(ctx context.Context, t ot.Transferable) error {
 	return nil
 }
 
-func (tenant *Tenant) Revert(ctx context.Context, t ot.Transaction) error {
+func (tenant *Tenant) Revert(ctx context.Context, t ot.Transferable) error {
 	return nil
 }

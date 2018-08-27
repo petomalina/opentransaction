@@ -8,7 +8,7 @@ import (
 	"github.com/gofrs/uuid"
 )
 
-type Transaction interface {
+type Transferable interface {
 	GetID() string
 
 	GetOriginTenant() string
@@ -20,10 +20,10 @@ type Transaction interface {
 	GetValue() int64
 }
 
-func NewSimpleTransaction(from, to, originT, destinationT string, value int64) *SimpleTransaction {
+func NewTransaction(from, to, originT, destinationT string, value int64) *Transaction {
 	id, _ := uuid.NewV4()
 
-	return &SimpleTransaction{
+	return &Transaction{
 		ID:                id.String(),
 		OriginTenant:      originT,
 		DestinationTenant: destinationT,
@@ -33,10 +33,10 @@ func NewSimpleTransaction(from, to, originT, destinationT string, value int64) *
 	}
 }
 
-func NewRandomTransaction() *SimpleTransaction {
+func NewRandomTransaction() *Transaction {
 	id, _ := uuid.NewV4()
 
-	return &SimpleTransaction{
+	return &Transaction{
 		ID:                id.String(),
 		OriginTenant:      "Balance",
 		DestinationTenant: "Bank",
@@ -49,10 +49,10 @@ func NewRandomTransaction() *SimpleTransaction {
 type Tenant interface {
 	ID() string
 
-	Accept(ctx context.Context, t Transaction) error
-	AcceptRequest(ctx context.Context, t Transaction) error
+	Accept(ctx context.Context, t Transferable) error
+	AcceptRequest(ctx context.Context, t Transferable) error
 
-	Revert(ctx context.Context, t Transaction) error
+	Revert(ctx context.Context, t Transferable) error
 }
 
 type Core struct {
@@ -74,7 +74,7 @@ func (c *Core) RegisterTenant(t Tenant) error {
 	return nil
 }
 
-func (c *Core) Send(tt ...Transaction) error {
+func (c *Core) Send(tt ...Transferable) error {
 	// enforce RBAC policies
 	for _, t := range tt {
 		if err := c.rbac.Enforce(t); err != nil {
@@ -84,7 +84,7 @@ func (c *Core) Send(tt ...Transaction) error {
 
 	// send transactions
 	var failIndex = 0
-	var t Transaction
+	var t Transferable
 	var err error
 
 	for failIndex, t = range tt {
@@ -119,6 +119,6 @@ func (c *Core) Send(tt ...Transaction) error {
 	return nil
 }
 
-func (c *Core) SendRequest(t Transaction) error {
+func (c *Core) SendRequest(t Transferable) error {
 	return nil
 }

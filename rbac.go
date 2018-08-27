@@ -54,7 +54,7 @@ func WithPolicy(origin, destination string) RBACOption {
 	}
 }
 
-func (rbac *RBAC) Enforce(t Transaction) error {
+func (rbac *RBAC) Enforce(t Transferable) error {
 	fmt.Println(rbac.policyMap, t.GetOriginTenant())
 	// open policy will automatically authorize any requests
 	if rbac.defaultPolicy == RBACDefaultOpen {

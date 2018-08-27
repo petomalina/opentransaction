@@ -6,7 +6,7 @@ service TransactionService {
 
 }
 
-message SimpleTransaction {
+message Transaction {
     string ID = 1;
 
     string origin_tenant = 2;
