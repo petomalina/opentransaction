@@ -46,29 +46,20 @@ func NewRandomTransaction() *Transaction {
 	}
 }
 
-type Tenant interface {
-	ID() string
-
-	Accept(ctx context.Context, t Transferable) error
-	AcceptRequest(ctx context.Context, t Transferable) error
-
-	Revert(ctx context.Context, t Transferable) error
-}
-
 type Core struct {
-	tenants map[string]Tenant
+	tenants map[string]TenantServer
 
 	rbac *RBAC
 }
 
 func NewCore(rbacOpts ...RBACOption) *Core {
 	return &Core{
-		tenants: make(map[string]Tenant),
+		tenants: make(map[string]TenantServer),
 		rbac:    NewRBAC(rbacOpts...),
 	}
 }
 
-func (c *Core) RegisterTenant(t Tenant) error {
+func (c *Core) RegisterTenant(t TenantServer) error {
 	c.tenants[t.ID()] = t
 
 	return nil

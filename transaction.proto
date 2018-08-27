@@ -2,8 +2,18 @@ syntax = "proto3";
 
 package opentransaction;
 
-service TransactionService {
+service Tenant {
+    rpc ID(Empty) returns (TenantID) {}
 
+    rpc Accept(Transaction) returns (Metadata) {}
+
+    rpc AcceptRequest(Transaction) returns (Metadata) {}
+
+    rpc Revert(Transaction) returns (Metadata) {}
+}
+
+message TenantID {
+    string ID = 1;
 }
 
 message Transaction {
@@ -16,4 +26,12 @@ message Transaction {
     string to_ref = 5;
 
     int64 value = 6;
+}
+
+message Metadata {
+    map<string, string> context = 1;
+}
+
+message Empty {
+
 }
