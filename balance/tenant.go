@@ -20,7 +20,7 @@ func (tenant *Tenant) Name() string {
 	return "[Tenant] Balance"
 }
 
-func (tenant *Tenant) Accept(ctx context.Context, t ot.Transaction) (*ot.Metadata, error) {
+func (tenant *Tenant) Accept(ctx context.Context, t *ot.Transaction) (*ot.Metadata, error) {
 	if t.GetOriginTenant() == t.GetDestinationTenant() {
 		return &ot.Metadata{}, nil
 	}
@@ -42,10 +42,10 @@ func (tenant *Tenant) Accept(ctx context.Context, t ot.Transaction) (*ot.Metadat
 	return &ot.Metadata{}, nil
 }
 
-func (tenant *Tenant) AcceptRequest(ctx context.Context, t ot.Transaction) (*ot.Metadata, error) {
+func (tenant *Tenant) AcceptRequest(ctx context.Context, t *ot.Transaction) (*ot.Metadata, error) {
 	return &ot.Metadata{}, nil
 }
 
-func (tenant *Tenant) Revert(ctx context.Context, t ot.Transaction) (*ot.Metadata, error) {
+func (tenant *Tenant) Revert(ctx context.Context, t *ot.Transaction) (*ot.Metadata, error) {
 	return &ot.Metadata{}, nil
 }

@@ -65,7 +65,9 @@ func (c *Core) RegisterTenant(addr string) error {
 	return nil
 }
 
-func (c *Core) Shutdown() error {}
+func (c *Core) Shutdown() error {
+	return nil
+}
 
 func (c *Core) Send(ctx context.Context, tt *Transactions) (*Metadata, error) {
 	// enforce RBAC policies
@@ -77,7 +79,7 @@ func (c *Core) Send(ctx context.Context, tt *Transactions) (*Metadata, error) {
 
 	// send transactions
 	var failIndex = 0
-	var t Transaction
+	var t *Transaction
 	var err error
 
 	for failIndex, t = range tt.Transactions {

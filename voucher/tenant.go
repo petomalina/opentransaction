@@ -17,14 +17,14 @@ func (tenant *Tenant) Name() string {
 	return "[Tenant] Voucher"
 }
 
-func (tenant *Tenant) Accept(ctx context.Context, t ot.Transaction) (*ot.Metadata, error) {
+func (tenant *Tenant) Accept(ctx context.Context, t *ot.Transaction) (*ot.Metadata, error) {
 	return nil, nil
 }
 
-func (tenant *Tenant) AcceptRequest(ctx context.Context, t ot.Transaction) (*ot.Metadata, error) {
+func (tenant *Tenant) AcceptRequest(ctx context.Context, t *ot.Transaction) (*ot.Metadata, error) {
 	return nil, nil
 }
 
-func (tenant *Tenant) Revert(ctx context.Context, t ot.Transaction) (*ot.Metadata, error) {
+func (tenant *Tenant) Revert(ctx context.Context, t *ot.Transaction) (*ot.Metadata, error) {
 	return nil, nil
 }

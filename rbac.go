@@ -1,7 +1,6 @@
 package opentransaction
 
 import (
-	"fmt"
 	"github.com/pkg/errors"
 )
 
@@ -54,8 +53,7 @@ func WithPolicy(origin, destination string) RBACOption {
 	}
 }
 
-func (rbac *RBAC) Enforce(t Transaction) error {
-	fmt.Println(rbac.policyMap, t.GetOriginTenant())
+func (rbac *RBAC) Enforce(t *Transaction) error {
 	// open policy will automatically authorize any requests
 	if rbac.defaultPolicy == RBACDefaultOpen {
 		return nil

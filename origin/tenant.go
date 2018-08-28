@@ -18,7 +18,7 @@ func (tenant *Tenant) Name() string {
 	return "[Tenant] Origin"
 }
 
-func (tenant *Tenant) Accept(ctx context.Context, t ot.Transaction) (*ot.Metadata, error) {
+func (tenant *Tenant) Accept(ctx context.Context, t *ot.Transaction) (*ot.Metadata, error) {
 	if t.GetDestinationTenant() == tenant.Name() {
 		return nil, errors.New("origin can't accept any transactions, please see the documentation")
 	}
@@ -26,7 +26,7 @@ func (tenant *Tenant) Accept(ctx context.Context, t ot.Transaction) (*ot.Metadat
 	return &ot.Metadata{}, nil
 }
 
-func (tenant *Tenant) AcceptRequest(ctx context.Context, t ot.Transaction) (*ot.Metadata, error) {
+func (tenant *Tenant) AcceptRequest(ctx context.Context, t *ot.Transaction) (*ot.Metadata, error) {
 	if t.GetDestinationTenant() == tenant.Name() {
 		return nil, errors.New("origin can't accept any transactions, please see the documentation")
 	}
@@ -34,6 +34,6 @@ func (tenant *Tenant) AcceptRequest(ctx context.Context, t ot.Transaction) (*ot.
 	return &ot.Metadata{}, nil
 }
 
-func (tenant *Tenant) Revert(ctx context.Context, t ot.Transaction) (*ot.Metadata, error) {
+func (tenant *Tenant) Revert(ctx context.Context, t *ot.Transaction) (*ot.Metadata, error) {
 	return &ot.Metadata{}, nil
 }
