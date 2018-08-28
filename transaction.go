@@ -8,18 +8,6 @@ import (
 	"github.com/gofrs/uuid"
 )
 
-type Transferable interface {
-	GetID() string
-
-	GetOriginTenant() string
-	GetDestinationTenant() string
-
-	GetFromRef() string
-	GetToRef() string
-
-	GetValue() int64
-}
-
 func NewTransaction(from, to, originT, destinationT string, value int64) *Transaction {
 	id, _ := uuid.NewV4()
 
@@ -65,7 +53,7 @@ func (c *Core) RegisterTenant(t TenantServer) error {
 	return nil
 }
 
-func (c *Core) Send(tt ...Transferable) error {
+func (c *Core) Send(tt ...Transaction) error {
 	// enforce RBAC policies
 	for _, t := range tt {
 		if err := c.rbac.Enforce(t); err != nil {
@@ -75,7 +63,7 @@ func (c *Core) Send(tt ...Transferable) error {
 
 	// send transactions
 	var failIndex = 0
-	var t Transferable
+	var t Transaction
 	var err error
 
 	for failIndex, t = range tt {
@@ -110,6 +98,6 @@ func (c *Core) Send(tt ...Transferable) error {
 	return nil
 }
 
-func (c *Core) SendRequest(t Transferable) error {
+func (c *Core) SendRequest(t Transaction) error {
 	return nil
 }

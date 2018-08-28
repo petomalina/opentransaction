@@ -12,6 +12,10 @@ service Tenant {
     rpc Revert(Transaction) returns (Metadata) {}
 }
 
+service Processor {
+    rpc Send(Transactions) returns (Metadata) {}
+}
+
 message TenantID {
     string ID = 1;
 }
@@ -26,6 +30,10 @@ message Transaction {
     string to_ref = 5;
 
     int64 value = 6;
+}
+
+message Transactions {
+    repeated Transaction transactions = 1;
 }
 
 message Metadata {

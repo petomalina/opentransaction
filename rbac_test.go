@@ -14,11 +14,11 @@ type RBACSuite struct {
 func (s *RBACSuite) TestEnforce() {
 	candidates := []struct {
 		options      []RBACOption
-		transactions map[Transferable]error
+		transactions map[*Transaction]error
 	}{
 		{
 			options: []RBACOption{},
-			transactions: map[Transferable]error{
+			transactions: map[*Transaction]error{
 				NewTransaction("A", "B", "Balance", "Balance", 100): nil,
 				NewTransaction("B", "A", "Balance", "Balance", 100): nil,
 			},
@@ -27,7 +27,7 @@ func (s *RBACSuite) TestEnforce() {
 			options: []RBACOption{
 				WithClosedPolicy(),
 			},
-			transactions: map[Transferable]error{
+			transactions: map[*Transaction]error{
 				NewTransaction("A", "B", "Balance", "Balance", 100): MissingOriginRBACPolicyErr,
 				NewTransaction("B", "A", "Balance", "Balance", 100): MissingOriginRBACPolicyErr,
 			},
@@ -37,7 +37,7 @@ func (s *RBACSuite) TestEnforce() {
 				WithClosedPolicy(),
 				WithPolicy("Balance", "Balance"),
 			},
-			transactions: map[Transferable]error{
+			transactions: map[*Transaction]error{
 				NewTransaction("A", "B", "Balance", "Balance", 100): nil,
 				NewTransaction("B", "A", "Balance", "Balance", 100): nil,
 				NewTransaction("B", "A", "Balance", "Bank", 100):    MissingDestinationRBACPolicyErr,
