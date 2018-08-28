@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/pkg/errors"
+	"google.golang.org/grpc"
 
 	"github.com/gofrs/uuid"
 )
@@ -35,29 +36,42 @@ func NewRandomTransaction() *Transaction {
 }
 
 type Core struct {
-	tenants map[string]TenantServer
+	tenants map[string]TenantClient
 
 	rbac *RBAC
 }
 
 func NewCore(rbacOpts ...RBACOption) *Core {
 	return &Core{
-		tenants: make(map[string]TenantServer),
+		tenants: make(map[string]TenantClient),
 		rbac:    NewRBAC(rbacOpts...),
 	}
 }
 
-func (c *Core) RegisterTenant(t TenantServer) error {
-	c.tenants[t.ID()] = t
+func (c *Core) RegisterTenant(addr string) error {
+	conn, err := grpc.Dial(addr, grpc.WithInsecure())
+	if err != nil {
+		return err
+	}
+
+	tenantClient := NewTenantClient(conn)
+	id, err := tenantClient.ID(context.Background(), nil)
+	if err != nil {
+		return err
+	}
+
+	c.tenants[id.ID] = tenantClient
 
 	return nil
 }
 
-func (c *Core) Send(tt ...Transaction) error {
+func (c *Core) Shutdown() error {}
+
+func (c *Core) Send(ctx context.Context, tt *Transactions) (*Metadata, error) {
 	// enforce RBAC policies
-	for _, t := range tt {
+	for _, t := range tt.Transactions {
 		if err := c.rbac.Enforce(t); err != nil {
-			return errors.Wrap(err, "an RBAC policy failed for the transaction"+fmt.Sprintf("%+v", t))
+			return nil, errors.Wrap(err, "an RBAC policy failed for the transaction"+fmt.Sprintf("%+v", t))
 		}
 	}
 
@@ -66,14 +80,14 @@ func (c *Core) Send(tt ...Transaction) error {
 	var t Transaction
 	var err error
 
-	for failIndex, t = range tt {
+	for failIndex, t = range tt.Transactions {
 		fmt.Printf("Sending transaction %+v\n", t)
 
-		if err = c.tenants[t.GetOriginTenant()].Accept(context.Background(), t); err != nil {
+		if _, err = c.tenants[t.GetOriginTenant()].Accept(context.Background(), t); err != nil {
 			break
 		}
 
-		if err = c.tenants[t.GetDestinationTenant()].Accept(context.Background(), t); err != nil {
+		if _, err = c.tenants[t.GetDestinationTenant()].Accept(context.Background(), t); err != nil {
 			c.tenants[t.GetOriginTenant()].Revert(context.Background(), t)
 			break
 		}
@@ -81,7 +95,7 @@ func (c *Core) Send(tt ...Transaction) error {
 
 	// we will need to revert all transactions until failIndex if it failed
 	if err != nil {
-		for i, t := range tt {
+		for i, t := range tt.Transactions {
 			// done on failIndex, we don't want to revert anything that was not processed
 			if i == failIndex {
 				break
@@ -92,10 +106,10 @@ func (c *Core) Send(tt ...Transaction) error {
 			c.tenants[t.GetDestinationTenant()].Revert(context.Background(), t)
 		}
 
-		return errors.New("an error occured during the transaction (reverted): " + err.Error())
+		return nil, errors.New("an error occured during the transaction (reverted): " + err.Error())
 	}
 
-	return nil
+	return &Metadata{}, nil
 }
 
 func (c *Core) SendRequest(t Transaction) error {
