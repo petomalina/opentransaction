@@ -1,10 +1,11 @@
 package opentransaction
 
 import (
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 	"log"
 	"net"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 func Serve(server TenantServer) error {

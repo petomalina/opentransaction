@@ -3,6 +3,7 @@ package opentransaction
 import (
 	"context"
 	"fmt"
+
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 
